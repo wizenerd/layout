@@ -54,6 +54,7 @@ type Layout struct {
 	Panes             []*Panel
 	cancel            func()
 	activePane        string
+	Drawer            *Drawer
 }
 
 func New(tabview bool) *Layout {
@@ -110,13 +111,17 @@ func (l *Layout) Render() *vecty.HTML {
 		c["mdl-layout--no-desktop-drawer-button"] = true
 	}
 	var p vecty.List
-	if l.Header != nil {
-		p = append(p, l.Header)
-	}
 
 	if l.LargeScreenOnly {
 		c["mdl-layout--large-screen-only"] = true
 	}
+	if l.Header != nil {
+		p = append(p, l.Header)
+	}
+	if l.Drawer != nil {
+		p = append(p, l.Drawer)
+	}
+
 	if l.TabView {
 		b := &TabBar{}
 		var pt vecty.List
@@ -130,6 +135,7 @@ func (l *Layout) Render() *vecty.HTML {
 		}
 		if l.Header == nil {
 			l.Header = &Header{}
+			p = append(p, l.Header)
 		}
 		l.Header.TabView = true
 		l.Header.TabNav = b
@@ -141,6 +147,7 @@ func (l *Layout) Render() *vecty.HTML {
 			p = append(p, elem.Main(prop.Class("mdl-layout__content"), l.Content))
 		}
 	}
+
 	return elem.Div(
 		l.Children,
 		c,
@@ -342,5 +349,19 @@ func (t *Panel) Render() *vecty.HTML {
 		c,
 		prop.ID(t.ID),
 		t.Children,
+	)
+}
+
+type Drawer struct {
+	vecty.Core
+	Title *Title
+	Nav   *Nav
+}
+
+func (d *Drawer) Render() *vecty.HTML {
+	c := make(vecty.ClassMap)
+	c["mdl-layout__drawer"] = true
+	return elem.Div(
+		c, d.Title, d.Nav,
 	)
 }
